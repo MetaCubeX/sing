@@ -50,22 +50,23 @@ func Copy(destination io.Writer, source io.Reader) (n int64, err error) {
 		}
 		replaceableReader, isReaderPossiblyReplaceable := source.(N.ReaderPossiblyReplaceable)
 		replaceableWriter, isWriterPossiblyReplaceable := destination.(N.WriterPossiblyReplaceable)
-		if possibly != 0 &&
-			(isReaderPossiblyReplaceable && replaceableReader.ReaderPossiblyReplaceable()) ||
+		if possibly > 0 {
+			if (isReaderPossiblyReplaceable && replaceableReader.ReaderPossiblyReplaceable()) ||
 			(isWriterPossiblyReplaceable && replaceableWriter.WriterPossiblyReplaceable()) {
-			possibly--
-			_n, err = CopyExtendedOnce(destination, source, readCounters, writeCounters)
-			n += _n
-			if err != nil {
-				if n == _n { // first time
-					err = N.ReportHandshakeFailure(originSource, err)
+				possibly--
+				_n, err = CopyExtendedOnce(destination, source, readCounters, writeCounters)
+				n += _n
+				if err != nil {
+					if n == _n { // first time
+						err = N.ReportHandshakeFailure(originSource, err)
+					}
+					if errors.Is(err, io.EOF) {
+						err = nil
+					}
+					return
 				}
-				if errors.Is(err, io.EOF) {
-					err = nil
-				}
-				return
+				continue
 			}
-			continue
 		}
 		srcSyscallConn, srcIsSyscall := source.(syscall.Conn)
 		dstSyscallConn, dstIsSyscall := destination.(syscall.Conn)
