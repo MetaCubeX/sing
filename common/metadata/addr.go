@@ -177,7 +177,9 @@ func AddrPortFromNet(netAddr net.Addr) netip.AddrPort {
 		ip = addr.IP
 		port = uint16(addr.Port)
 	case *net.UDPAddr:
-		ip = addr.IP
+		if ip = addr.IP.To4(); ip == nil {
+			ip = addr.IP
+		}
 		port = uint16(addr.Port)
 	case *net.IPAddr:
 		ip = addr.IP
