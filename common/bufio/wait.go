@@ -17,6 +17,9 @@ func CreateReadWaiter(reader io.Reader) (N.ReadWaiter, bool) {
 	if readWaiter, created := createSyscallReadWaiter(reader); created {
 		return readWaiter, true
 	}
+	if readWaiter, created := createReadWithBufferWaiter(reader); created {
+		return readWaiter, true
+	}
 	return nil, false
 }
 
