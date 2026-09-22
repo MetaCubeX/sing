@@ -34,5 +34,8 @@ func CreatePacketReadWaiter(reader N.PacketReader) (N.PacketReadWaiter, bool) {
 	if readWaiter, created := createSyscallPacketReadWaiter(reader); created {
 		return readWaiter, true
 	}
+	if readWaiter, created := createReadFromWithBufferPacketWaiter(reader); created {
+		return readWaiter, true
+	}
 	return nil, false
 }
