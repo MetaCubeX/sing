@@ -22,6 +22,10 @@ func NewChunkReader(upstream io.Reader, maxChunkSize int) *ChunkReader {
 }
 
 func (c *ChunkReader) ReadBuffer(buffer *buf.Buffer) error {
+	if c.cache != nil && !c.cache.IsEmpty() {
+        return common.Error(buffer.ReadFrom(c.cache))
+    }
+	
 	if buffer.FreeLen() >= c.maxChunkSize {
 		return c.upstream.ReadBuffer(buffer)
 	}
